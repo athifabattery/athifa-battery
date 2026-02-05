@@ -5,60 +5,71 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Admin Attifa Battery</title>
 <style>
-body{font-family:Arial;background:#f4f4f4;margin:0;padding:15px}
-h2{text-align:center}
-.card{background:#fff;padding:15px;margin-bottom:10px;border-radius:8px}
-input,select,button{width:100%;padding:8px;margin-top:6px}
-button{background:#0f172a;color:#fff;border:none;border-radius:5px}
-.item{border-bottom:1px solid #ddd;padding:8px 0}
-.del{background:#ef4444;margin-top:5px}
+body{
+  font-family: Arial, sans-serif;
+  background:#0f172a;
+  color:#fff;
+  padding:15px
+}
+h2,h3{margin-top:15px}
+.card{
+  padding:15px;
+  border-radius:8px;
+  min-width:160px
+}
+.green{background:#16a34a}
+.blue{background:#2563eb}
+ul{list-style:none;padding:0}
+li{
+  background:#111827;
+  padding:10px;
+  border-radius:6px;
+  margin-bottom:10px
+}
+.logout{
+  background:#dc2626;
+  color:#fff;
+  border:none;
+  padding:8px 12px;
+  border-radius:6px;
+  margin-bottom:10px
+}
 </style>
 </head>
 
 <body>
+
+<button class="logout" onclick="logout()">Logout</button>
+
 <h2>📊 Dashboard Omzet</h2>
 
 <div style="display:flex;gap:10px;flex-wrap:wrap">
-  <div style="background:#16a34a;color:#fff;padding:15px;border-radius:8px;min-width:150px">
+  <div class="card green">
     <b>Total Omzet</b>
     <h3 id="totalOmzet">Rp 0</h3>
   </div>
 
-  <div style="background:#2563eb;color:#fff;padding:15px;border-radius:8px;min-width:150px">
+  <div class="card blue">
     <b>Jumlah Order</b>
     <h3 id="totalOrder">0</h3>
   </div>
 </div>
 
-<h3 style="margin-top:20px">📦 Order Terbaru</h3>
+<h3>📦 Order Terbaru</h3>
 <ul id="orderList"></ul>
-<h2>🔐 Admin Attifa Battery</h2>
-
-<div class="card">
-  <h3>Tambah Produk</h3>
-  <input id="nama" placeholder="Nama produk">
-  <input id="harga" type="number" placeholder="Harga">
-  <select id="jenis">
-    <option>Mobil</option>
-    <option>Motor</option>
-  </select>
-  <select id="kondisi">
-    <option>Baru</option>
-    <option>Second</option>
-  </select>
-  <input id="stok" type="number" placeholder="Stok">
-  <button onclick="addProduct()">Simpan Produk</button>
-</div>
-
-<div class="card">
-  <h3>Daftar Produk</h3>
-  <div id="list"></div>
-</div>
 
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-import { getDatabase, ref, push, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js";
 
+// 🔐 PROTEKSI LOGIN
+if(localStorage.getItem("login") !== "ok"){
+  window.location.href = "login.html";
+}
+
+// 🔥 FIREBASE IMPORT
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js";
+
+// 🔥 FIREBASE CONFIG
 const firebaseConfig = {
   apiKey: "AIzaSyA10eMVkOtOWrJyXBSpl032vM3tynEyRGY",
   authDomain: "athifa-battery-35228.firebaseapp.com",
@@ -69,43 +80,41 @@ const firebaseConfig = {
   appId: "1:926672701476:web:e60157b314a7762c0f70b1"
 };
 
+// 🔥 INIT
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-window.addProduct = function(){
-  const p = {
-    nama: nama.value,
-    harga: Number(harga.value),
-    jenis: jenis.value,
-    kondisi: kondisi.value,
-    stok: Number(stok.value)
-  };
-  if(!p.nama || !p.harga){ alert("Lengkapi data"); return; }
-  push(ref(db,"products"), p);
-  nama.value = harga.value = stok.value = "";
-};
+// 📊 DASHBOARD OMZET
+const ordersRef = ref(db, "orders");
 
-const list = document.getElementById("list");
+onValue(ordersRef, snap => {
+  let omzet = 0;
+  let count = 0;
+  orderList.innerHTML = "";
 
-onValue(ref(db,"products"), snap=>{
-  list.innerHTML = "";
-  snap.forEach(c=>{
-    const p = c.val();
-    list.innerHTML += `
-      <div class="item">
-        <b>${p.nama}</b><br>
-        Rp ${p.harga} | ${p.jenis} | ${p.kondisi} | Stok: ${p.stok}
-        <button class="del" onclick="hapus('${c.key}')">Hapus</button>
-      </div>
+  snap.forEach(o => {
+    const d = o.val();
+    count++;
+    omzet += d.total || 0;
+
+    const li = document.createElement("li");
+    li.innerHTML = `
+      🧾 <b>${new Date(d.tanggal).toLocaleString()}</b><br>
+      Total: Rp ${Number(d.total).toLocaleString("id-ID")}
     `;
+    orderList.appendChild(li);
   });
+
+  totalOmzet.innerText = "Rp " + omzet.toLocaleString("id-ID");
+  totalOrder.innerText = count;
 });
 
-window.hapus = function(id){
-  if(confirm("Hapus produk?")){
-    remove(ref(db,"products/"+id));
-  }
+// 🔓 LOGOUT
+window.logout = function(){
+  localStorage.removeItem("login");
+  window.location.href = "login.html";
 };
+
 </script>
 
 </body>
