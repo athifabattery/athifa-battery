@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Attifa Battery | Aki Mobil & Motor</title>
 <style>
-body{font-family:Arial;margin:0;background:#f5f5f5}
+body{font-family:Arial;margin:0;background:#f4f4f4}
 header{background:#0f172a;color:#fff;padding:15px;text-align:center}
-.container{padding:15px}
+.container{padding:15px;padding-bottom:120px}
 .card{background:#fff;padding:15px;margin-bottom:10px;border-radius:8px}
 button{background:#22c55e;border:none;color:#fff;padding:10px 15px;border-radius:5px}
 .cart{background:#fff;padding:15px;position:fixed;bottom:0;width:100%;border-top:2px solid #ddd}
@@ -22,22 +22,21 @@ button{background:#22c55e;border:none;color:#fff;padding:10px 15px;border-radius
   <p>Aki Mobil & Motor • Baru & Second</p>
 </header>
 
-<div class="container">
-  <div class="container" id="productList"></div>
+<div class="container" id="productList">
+  <p>Memuat produk...</p>
 </div>
 
 <div class="cart">
   <b>Keranjang</b>
-  <div id="cartItems"></div>
-  <br>
+  <div id="cartItems"></div><br>
   <button onclick="checkout()">Order via WhatsApp</button>
 </div>
 
-<!-- ================= FIREBASE ================= -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
 import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js";
 
+/* FIREBASE CONFIG */
 const firebaseConfig = {
   apiKey: "AIzaSyA10eMVkOtOWrJyXBSpl032vM3tynEyRGY",
   authDomain: "athifa-battery-35228.firebaseapp.com",
@@ -48,24 +47,54 @@ const firebaseConfig = {
   appId: "1:926672701476:web:e60157b314a7762c0f70b1"
 };
 
+/* INIT */
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
+/* KERANJANG */
 window.cart = [];
 
-window.addToCart = function(nama,harga){
-  cart.push({n:nama,p:harga});
+window.addToCart = function(nama, harga){
+  cart.push({n:nama, p:harga});
   renderCart();
-}
+};
 
 function renderCart(){
   let html = "";
   cart.forEach(i=>{
-    html += `<div class="cart-item">• ${i.n} - Rp ${i.p}</div>`;
+    html += `<div class="cart-item">• ${i.n} - Rp ${i.p.toLocaleString("id-ID")}</div>`;
   });
   document.getElementById("cartItems").innerHTML = html;
 }
 
+/* LOAD PRODUK (AMAN) */
+document.addEventListener("DOMContentLoaded", () => {
+  const productList = document.getElementById("productList");
+
+  onValue(ref(db, "products"), (snapshot) => {
+    productList.innerHTML = "";
+
+    if (!snapshot.exists()) {
+      productList.innerHTML = "<p>Produk belum tersedia</p>";
+      return;
+    }
+
+    snapshot.forEach((child) => {
+      const p = child.val();
+
+      productList.innerHTML += `
+        <div class="card">
+          <h3>${p.nama}</h3>
+          <p>${p.jenis} • ${p.kondisi}</p>
+          <b>Rp ${Number(p.harga).toLocaleString("id-ID")}</b><br><br>
+          <button onclick="addToCart('${p.nama}', ${p.harga})">Tambah</button>
+        </div>
+      `;
+    });
+  });
+});
+
+/* CHECKOUT */
 window.checkout = function(){
   if(cart.length === 0){
     alert("Keranjang masih kosong");
@@ -87,8 +116,8 @@ window.checkout = function(){
 
   window.location.href =
     "https://wa.me/6287882385071?text=" + pesan;
-}
+};
 </script>
 
 </body>
-  </html>
+</html>
