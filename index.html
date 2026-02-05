@@ -2,65 +2,50 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Attifa Battery | Aki Mobil & Motor</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
-body{font-family:Arial;margin:0;background:#f4f4f4}
-header{background:#111;color:#fff;padding:15px;text-align:center}
-.product{background:#fff;margin:10px;padding:15px;border-radius:8px}
-button{background:#25d366;color:#fff;border:none;padding:10px;width:100%;border-radius:5px}
-.cart{background:#fff;padding:10px;margin:10px;border-radius:8px}
+body{font-family:Arial;margin:0;background:#f5f5f5}
+header{background:#0f172a;color:#fff;padding:15px;text-align:center}
+.container{padding:15px}
+.card{background:#fff;padding:15px;margin-bottom:10px;border-radius:8px}
+button{background:#22c55e;border:none;color:#fff;padding:10px 15px;border-radius:5px}
+.cart{background:#fff;padding:15px;position:fixed;bottom:0;width:100%;border-top:2px solid #ddd}
+.cart-item{font-size:14px}
 </style>
 </head>
+
 <body>
 
 <header>
-<h2>🔋 ATTIFA BATTERY</h2>
-<p>Jual Beli Aki Mobil & Motor (Baru & Second)</p>
+  <h2>🔋 Attifa Battery</h2>
+  <p>Aki Mobil & Motor • Baru & Second</p>
 </header>
 
-<div class="product">
-<h3>Aki GS Astra 35Ah</h3>
-<p>Rp 550.000</p>
-<button onclick="addCart('Aki GS Astra',550000)">Tambah ke Keranjang</button>
-</div>
+<div class="container">
+  <div class="card">
+    <h3>Aki GS Astra 35Ah</h3>
+    <p>Mobil • Baru</p>
+    <b>Rp 550.000</b><br><br>
+    <button onclick="addToCart('Aki GS Astra 35Ah',550000)">Tambah</button>
+  </div>
 
-<div class="product">
-<h3>Aki Yuasa Motor</h3>
-<p>Rp 180.000</p>
-<button onclick="addCart('Aki Yuasa Motor',180000)">Tambah ke Keranjang</button>
+  <div class="card">
+    <h3>Aki Yuasa Motor</h3>
+    <p>Motor • Second</p>
+    <b>Rp 180.000</b><br><br>
+    <button onclick="addToCart('Aki Yuasa Motor',180000)">Tambah</button>
+  </div>
 </div>
 
 <div class="cart">
-<h3>🛒 Keranjang</h3>
-<ul id="cart"></ul>
-<button onclick="checkout()">Order via WhatsApp</button>
+  <b>Keranjang</b>
+  <div id="cartItems"></div>
+  <br>
+  <button onclick="checkout()">Order via WhatsApp</button>
 </div>
 
-<script>
-let cart=[];
-function addCart(n,p){
-cart.push({n,p});
-render();
-}
-function render(){
-let html='';
-let total=0;
-cart.forEach(i=>{
-html+=`<li>${i.n} - Rp ${i.p}</li>`;
-total+=i.p;
-});
-html+=`<li><b>Total: Rp ${total}</b></li>`;
-document.getElementById('cart').innerHTML=html;
-}
-function checkout(){
-let pesan='Order Attifa Battery:%0A';
-cart.forEach(i=>{
-pesan+=`- ${i.n} Rp ${i.p}%0A`;
-});
-window.location.href='https://wa.me/6287882385071?text='+pesan;
-}
-</script>
+<!-- ================= FIREBASE ================= -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
 import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js";
@@ -78,8 +63,26 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
+window.cart = [];
+
+window.addToCart = function(nama,harga){
+  cart.push({n:nama,p:harga});
+  renderCart();
+}
+
+function renderCart(){
+  let html = "";
+  cart.forEach(i=>{
+    html += `<div class="cart-item">• ${i.n} - Rp ${i.p}</div>`;
+  });
+  document.getElementById("cartItems").innerHTML = html;
+}
+
 window.checkout = function(){
-  if(cart.length === 0){ alert("Keranjang masih kosong"); return; }
+  if(cart.length === 0){
+    alert("Keranjang masih kosong");
+    return;
+  }
 
   const order = {
     waktu: new Date().toISOString(),
@@ -87,14 +90,17 @@ window.checkout = function(){
     total: cart.reduce((t,i)=>t+i.p,0)
   };
 
-  push(ref(db, "orders"), order);
+  push(ref(db,"orders"), order);
 
   let pesan = "Order Attifa Battery:%0A";
-  cart.forEach(i=> pesan += `- ${i.n} Rp ${i.p}%0A`);
+  cart.forEach(i=>{
+    pesan += `- ${i.n} Rp ${i.p}%0A`;
+  });
 
   window.location.href =
     "https://wa.me/62XXXXXXXXXX?text=" + pesan;
-};
+}
 </script>
+
 </body>
-</html>
+  </html>
