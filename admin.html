@@ -1,1 +1,97 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Attifa Battery</title>
+<style>
+body{font-family:Arial;background:#f4f4f4;margin:0;padding:15px}
+h2{text-align:center}
+.card{background:#fff;padding:15px;margin-bottom:10px;border-radius:8px}
+input,select,button{width:100%;padding:8px;margin-top:6px}
+button{background:#0f172a;color:#fff;border:none;border-radius:5px}
+.item{border-bottom:1px solid #ddd;padding:8px 0}
+.del{background:#ef4444;margin-top:5px}
+</style>
+</head>
 
+<body>
+
+<h2>🔐 Admin Attifa Battery</h2>
+
+<div class="card">
+  <h3>Tambah Produk</h3>
+  <input id="nama" placeholder="Nama produk">
+  <input id="harga" type="number" placeholder="Harga">
+  <select id="jenis">
+    <option>Mobil</option>
+    <option>Motor</option>
+  </select>
+  <select id="kondisi">
+    <option>Baru</option>
+    <option>Second</option>
+  </select>
+  <input id="stok" type="number" placeholder="Stok">
+  <button onclick="addProduct()">Simpan Produk</button>
+</div>
+
+<div class="card">
+  <h3>Daftar Produk</h3>
+  <div id="list"></div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+import { getDatabase, ref, push, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyA10eMVkOtOWrJyXBSpl032vM3tynEyRGY",
+  authDomain: "athifa-battery-35228.firebaseapp.com",
+  databaseURL: "https://athifa-battery-35228-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "athifa-battery-35228",
+  storageBucket: "athifa-battery-35228.firebasestorage.app",
+  messagingSenderId: "926672701476",
+  appId: "1:926672701476:web:e60157b314a7762c0f70b1"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+window.addProduct = function(){
+  const p = {
+    nama: nama.value,
+    harga: Number(harga.value),
+    jenis: jenis.value,
+    kondisi: kondisi.value,
+    stok: Number(stok.value)
+  };
+  if(!p.nama || !p.harga){ alert("Lengkapi data"); return; }
+  push(ref(db,"products"), p);
+  nama.value = harga.value = stok.value = "";
+};
+
+const list = document.getElementById("list");
+
+onValue(ref(db,"products"), snap=>{
+  list.innerHTML = "";
+  snap.forEach(c=>{
+    const p = c.val();
+    list.innerHTML += `
+      <div class="item">
+        <b>${p.nama}</b><br>
+        Rp ${p.harga} | ${p.jenis} | ${p.kondisi} | Stok: ${p.stok}
+        <button class="del" onclick="hapus('${c.key}')">Hapus</button>
+      </div>
+    `;
+  });
+});
+
+window.hapus = function(id){
+  if(confirm("Hapus produk?")){
+    remove(ref(db,"products/"+id));
+  }
+};
+</script>
+
+</body>
+</html>
