@@ -16,7 +16,11 @@ button{background:#22c55e;border:none;color:#fff;padding:10px 15px;border-radius
 .cart-item{font-size:14px}
 </style>
 </head>
-
+<script>
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("sw.js");
+}
+</script>
 <body>
 
 <header>
