@@ -61,6 +61,22 @@ pesan+=`- ${i.n} Rp ${i.p}%0A`;
 window.location.href='https://wa.me/6287882385071?text='+pesan;
 }
 </script>
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
 
+// Your web app's Firebase configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyA10eMVkOtOWrJyXBSpl032vM3tynEyRGY",
+  authDomain: "athifa-battery-35228.firebaseapp.com",
+  projectId: "athifa-battery-35228",
+  storageBucket: "athifa-battery-35228.firebasestorage.app",
+  messagingSenderId: "926672701476",
+  appId: "1:926672701476:web:e60157b314a7762c0f70b1"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
 </body>
 </html>
